@@ -108,83 +108,80 @@ for(let x = 0; x < 10000; x++){
 console.log("\nPopulating tables...\n\n");
 
 
-new Promise(async (resolve, reject) => {
-    await Promise.all([
+Promise.all([
 
-        new Promise(async (resolve, reject) => {
-            const mysqlClient = mysql.createConnection({
-                host: "localhost",
-                user: "root",
-                database: "cab_company",
-                password: "root"
-            });
-            
-            mysqlClient.query(
-                fs.readFileSync(employeeSqlFile).toString().split("\n").join(""),
-                async (err) => {
-                    if(err) reject(err);
-                    try{
-                        await Promise.all([
-                            new Promise((resolve, reject) => {
-                                mysqlClient.query(
-                                  fs.readFileSync(vehiclesSqlFile).toString().split("\n").join(""),
-                                  (err) => {
+    new Promise(async (resolve, reject) => {
+        const mysqlClient = mysql.createConnection({
+            host: "localhost",
+            user: "root",
+            database: "cab_company",
+            password: "root"
+        });
+        
+        mysqlClient.query(
+            fs.readFileSync(employeeSqlFile).toString().split("\n").join(""),
+            async (err) => {
+                if(err) reject(err);
+                try{
+                    await Promise.all([
+                        new Promise((resolve, reject) => {
+                            mysqlClient.query(
+                              fs.readFileSync(vehiclesSqlFile).toString().split("\n").join(""),
+                              (err) => {
+                                if(err == null){
+                                    resolve(null);
+                                    return;
+                                }
+                                reject(err);
+                              }  
+                            )
+                        }),
+                        new Promise((resolve, reject) => {
+                            mysqlClient.query(
+                                fs.readFileSync(accountsSqlFile).toString().split("\n").join(""),
+                                (err) => {
                                     if(err == null){
                                         resolve(null);
                                         return;
                                     }
                                     reject(err);
-                                  }  
-                                )
-                            }),
-                            new Promise((resolve, reject) => {
-                                mysqlClient.query(
-                                    fs.readFileSync(accountsSqlFile).toString().split("\n").join(""),
-                                    (err) => {
-                                        if(err == null){
-                                            resolve(null);
-                                            return;
-                                        }
-                                        reject(err);
-                                    }  
-                                )
-                            }),
-                        ]);
-                    }
-                    catch(err){
-                        reject(err);
-                    }
-                    resolve(null);
-                }
-            );
-        }),
-
-        new Promise((resolve, reject) => {
-            const url = 'mongodb://localhost:27017';
-            const client = new MongoClient(url);
-            
-            client.connect().then(async (client) => {
-                const db = client.db("cab_company");
-                const employeesCollection = db.collection("employees");
-                const vehiclesCollection = db.collection("vehicles");
-                const accountsCollection = db.collection("accounts");
-                try{
-                    await Promise.all([
-                        employeesCollection.insertMany(employees),
-                        vehiclesCollection.insertMany(vehicles),
-                        accountsCollection.insertMany(accounts),
+                                }  
+                            )
+                        }),
                     ]);
-                    resolve(null);
                 }
                 catch(err){
                     reject(err);
-                } 
-            });
-        }),
+                }
+                resolve(null);
+            }
+        );
+    }),
 
-    ]);
-    resolve(null);
-}).then(res => {
+    new Promise((resolve, reject) => {
+        const url = 'mongodb://localhost:27017';
+        const client = new MongoClient(url);
+        
+        client.connect().then(async (client) => {
+            const db = client.db("cab_company");
+            const employeesCollection = db.collection("employees");
+            const vehiclesCollection = db.collection("vehicles");
+            const accountsCollection = db.collection("accounts");
+            try{
+                await Promise.all([
+                    employeesCollection.insertMany(employees),
+                    vehiclesCollection.insertMany(vehicles),
+                    accountsCollection.insertMany(accounts),
+                ]);
+                resolve(null);
+            }
+            catch(err){
+                reject(err);
+            } 
+        });
+    }),
+
+]).then(res => {
     process.exit(0);
 }).catch(err => {
     throw err;
