@@ -1,0 +1,39 @@
+''' MYSQL SCHEMA FILE '''
+
+CREATE DATABASE cab_company;
+use cab_company;
+
+CREATE TABLE IF NOT EXISTS employees (
+    eid INT(11) NOT NULL AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    middle_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    gender VARCHAR(1) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY(eid)
+);
+
+CREATE TABLE IF NOT EXISTS vehicles (
+    vid INT(11) NOT NULL AUTO_INCREMENT,
+    eid INT(11) NOT NULL,
+    yr INT(4) NOT NULL,
+    brand VARCHAR(50) NOT NULL,
+    model VARCHAR(50) NOT NULL,
+    vin VARCHAR(50) NOT NULL,
+    ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY(vid),
+    UNIQUE(eid),
+    FOREIGN KEY(eid) REFERENCES employees(eid)
+);
+
+CREATE TABLE IF NOT EXISTS accounts (
+    aid INT(11) NOT NULL AUTO_INCREMENT,
+    eid INT(11) NOT NULL,
+    bic VARCHAR(12),
+    account_number VARCHAR(12),
+    bitcoin_address VARCHAR(64) NOT NULL,
+    ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY(aid),
+    FOREIGN KEY(eid) REFERENCES employees(eid)
+);

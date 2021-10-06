@@ -1,0 +1,6 @@
+populator/dist/*
+!populator/dist/README.md
+*/node_modules
+*.odt
+.~*
+package-lock.json
