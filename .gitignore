@@ -4,3 +4,4 @@ populator/dist/*
 *.odt
 .~*
 package-lock.json
+.env

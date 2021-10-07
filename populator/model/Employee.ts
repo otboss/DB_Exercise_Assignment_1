@@ -1,4 +1,4 @@
-import { Gender } from "./gender";
+import { Gender } from "./Gender";
 
 export interface Employee {
     firstName: string;

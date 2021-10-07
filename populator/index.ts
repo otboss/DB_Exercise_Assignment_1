@@ -1,13 +1,23 @@
-import { Employee } from "./model/employee";
-import { Gender } from "./model/gender";
-import { Vehicle } from "./model/vehicle";
-import { Account } from "./model/account";
+import { Employee } from "./model/Employee";
+import { Gender } from "./model/Gender";
+import { Vehicle } from "./model/Vehicle";
+import { Account } from "./model/Account";
 import { MongoClient } from "mongodb";
+import { Environment } from "./model/Environment";
 import * as fs from "fs";
 import * as faker from "faker";
 import * as mysql from "mysql2";
+import * as dotenv from "dotenv";
 
-function getRandomInt(min, max) {
+const env: Partial<Environment>  = (process.argv.includes("--dev") ? dotenv.config({path: "../dev.env"}) : dotenv.config({path: "../.env"})).parsed;
+if(env == null) {
+    throw `
+Error while looking for file '${process.argv.includes("--dev") ? "../dev.env" : "../.env"}'
+environment variables file was not found
+`;
+}
+
+const getRandomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min) + min);
@@ -72,10 +82,12 @@ for(let x = 0; x < 10000; x++){
         ...employee,
         ts: new Date(),
     });
+
     vehicles.push({
         ...vehicle,
         ts: new Date(),
     });
+
     accounts.push({
         ...account,
         ts: new Date(),
@@ -112,10 +124,11 @@ Promise.all([
 
     new Promise(async (resolve, reject) => {
         const mysqlClient = mysql.createConnection({
-            host: "localhost",
-            user: "root",
-            database: "cab_company",
-            password: "root"
+            host: env.MYSQL_HOST,
+            user: env.MYSQL_USER,
+            database: env.MYSQL_DATABASE,
+            password: env.MYSQL_PASSWORD,
+            port: parseInt(env.MYSQL_PORT),
         });
         
         mysqlClient.query(
@@ -159,7 +172,7 @@ Promise.all([
     }),
 
     new Promise((resolve, reject) => {
-        const url = 'mongodb://localhost:27017';
+        const url = `mongodb://${env.MONGO_HOST}:${env.MONGO_PORT}`;
         const client = new MongoClient(url);
         
         client.connect().then(async (client) => {
