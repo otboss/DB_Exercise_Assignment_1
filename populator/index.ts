@@ -53,8 +53,9 @@ fs.writeFileSync(accountsSqlFile, `INSERT INTO accounts (
 const employees: Array<Employee & {ts: Date}> = [];
 const vehicles: Array<Vehicle & {ts: Date}> = [];
 const accounts: Array<Account & {ts: Date}> = [];
+const totalRecords = 10000;
 
-for(let x = 0; x < 10000; x++){
+for(let x = 0; x < totalRecords; x++){
     const genderSelection: number = getRandomInt(0,2);
 
     const employee: Employee = {
@@ -78,20 +79,11 @@ for(let x = 0; x < 10000; x++){
         bitcoinAddress: faker.finance.bitcoinAddress()
     };
 
-    employees.push({
-        ...employee,
-        ts: new Date(),
-    });
+    const ts: Date = new Date();
 
-    vehicles.push({
-        ...vehicle,
-        ts: new Date(),
-    });
-
-    accounts.push({
-        ...account,
-        ts: new Date(),
-    });
+    employees.push({ ...employee, ts, });
+    vehicles.push({ ...vehicle, ts, });
+    accounts.push({ ...account, ts,  });
 
     fs.appendFileSync(employeeSqlFile, `(
     '${employee.firstName.split("'").join("")}',
@@ -99,7 +91,7 @@ for(let x = 0; x < 10000; x++){
     '${employee.lastName.split("'").join("")}',
     '${employee.gender}',
     '${employee.phone}'
-)${x !== 9999 ? "," : ";"}`, "utf-8");  
+)${x !== totalRecords - 1 ? "," : ";"}`, "utf-8");  
 
     fs.appendFileSync(vehiclesSqlFile, `(
     ${x+1},
@@ -107,14 +99,14 @@ for(let x = 0; x < 10000; x++){
     '${vehicle.brand}',
     '${vehicle.model}',
     '${vehicle.vin}'
-)${x !== 9999 ? "," : ";"}`, "utf-8");
+)${x !== totalRecords - 1 ? "," : ";"}`, "utf-8");
 
     fs.appendFileSync(accountsSqlFile, `(
     ${x+1},
     '${account.bankIdentificationCode}',
     '${account.accountNumber}',
     '${account.bitcoinAddress}' 
-)${x !== 9999 ? "," : ";"}`, "utf-8");  
+)${x !== totalRecords - 1 ? "," : ";"}`, "utf-8");  
 }
 
 console.log("\nPopulating tables...\n\n");
@@ -136,6 +128,7 @@ Promise.all([
             async (err) => {
                 if(err) reject(err);
                 try{
+                    const mysqlStartTime: number = Date.now();
                     await Promise.all([
                         new Promise((resolve, reject) => {
                             mysqlClient.query(
@@ -162,6 +155,7 @@ Promise.all([
                             )
                         }),
                     ]);
+                    console.log(`MySQL insertions completed in: ${Date.now() - mysqlStartTime} ms`);
                 }
                 catch(err){
                     reject(err);
@@ -181,11 +175,13 @@ Promise.all([
             const vehiclesCollection = db.collection("vehicles");
             const accountsCollection = db.collection("accounts");
             try{
+                const mongoStartTime: number = Date.now();
                 await Promise.all([
                     employeesCollection.insertMany(employees),
                     vehiclesCollection.insertMany(vehicles),
                     accountsCollection.insertMany(accounts),
                 ]);
+                console.log(`Mongo insertions completed in: ${Date.now() - mongoStartTime} ms`);
                 resolve(null);
             }
             catch(err){

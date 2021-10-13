@@ -1,6 +1,4 @@
-''' MYSQL SCHEMA FILE '''
-
-CREATE DATABASE cab_company;
+CREATE DATABASE IF NOT EXISTS cab_company;
 use cab_company;
 
 CREATE TABLE IF NOT EXISTS employees (
