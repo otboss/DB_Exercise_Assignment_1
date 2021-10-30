@@ -170,7 +170,7 @@ Promise.all([
         const client = new MongoClient(url);
         
         client.connect().then(async (client) => {
-            const db = client.db("cab_company");
+            const db = client.db(env.MONGO_DATABASE);
             const employeesCollection = db.collection("employees");
             const vehiclesCollection = db.collection("vehicles");
             const accountsCollection = db.collection("accounts");
