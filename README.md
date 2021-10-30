@@ -1,5 +1,7 @@
 <h1>DB Exercise</h1>
 
+Read the Assignment1 - Questions pdf file for information
+
 <h3>Prerequisites</h3>
 
 <ol>
